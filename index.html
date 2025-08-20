@@ -1,0 +1,297 @@
+import React, { useState } from "react";
+
+// BiharBazaar - Single-file React component (Tailwind CSS assumed)
+// Features: Hero, product grid with photos, prices, add-to-cart, cart sidebar, product modal
+// All visible text is in Hindi. Replace image URLs or wire a real backend as needed.
+
+export default function BiharBazaar() {
+  const sampleProducts = [
+    {
+      id: 1,
+      name: "Thekua (ठेकुआ)",
+      desc: "मक्खनदार और गरमा गरम पारंपरिक बिस्कुट — घर जैसा स्वाद.",
+      price: 150,
+      unit: "250g",
+      img: "https://source.unsplash.com/800x600/?thekua,biscuit",
+    },
+    {
+      id: 2,
+      name: "Khasta (खस्ता)",
+      desc: "क्रिस्पी और मसालेदार — त्योहारों की शान.",
+      price: 120,
+      unit: "200g",
+      img: "https://source.unsplash.com/800x600/?khasta,snack",
+    },
+    {
+      id: 3,
+      name: "Litti Chokha Pack",
+      desc: "घरेलू तरीके से बनी स्वादिष्ट लिट्टी-चोखा (frozen/ready-to-eat).",
+      price: 320,
+      unit: "4 पीस",
+      img: "https://source.unsplash.com/800x600/?litti,chokha,food",
+    },
+    {
+      id: 4,
+      name: "Laung-Lata (लौंग-लता) मिष्ठान",
+      desc: "मिठास भरा पारंपरिक पटना स्टाइल मिष्ठान.",
+      price: 220,
+      unit: "300g",
+      img: "https://source.unsplash.com/800x600/?indian-sweets",
+    },
+  ];
+
+  const [products] = useState(sampleProducts);
+  const [cart, setCart] = useState([]);
+  const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [showCart, setShowCart] = useState(false);
+
+  function addToCart(product) {
+    setCart((prev) => {
+      const found = prev.find((p) => p.id === product.id);
+      if (found) {
+        return prev.map((p) => (p.id === product.id ? { ...p, qty: p.qty + 1 } : p));
+      }
+      return [...prev, { ...product, qty: 1 }];
+    });
+  }
+
+  function removeFromCart(id) {
+    setCart((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  function changeQty(id, qty) {
+    if (qty <= 0) return removeFromCart(id);
+    setCart((prev) => prev.map((p) => (p.id === id ? { ...p, qty } : p)));
+  }
+
+  const subtotal = cart.reduce((s, p) => s + p.price * p.qty, 0);
+
+  const filtered = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(query.toLowerCase()) ||
+      p.desc.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="text-2xl font-bold text-rose-600">BiharBazaar</div>
+            <div className="text-sm text-gray-600">Bihar ke mashhoor swad — seedha apke ghar</div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              className="px-3 py-2 border rounded-md w-64"
+              placeholder="Search: thekua, khasta, litti..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+
+            <button
+              className="px-4 py-2 bg-rose-500 text-white rounded-md shadow hover:bg-rose-600"
+              onClick={() => setShowCart(true)}
+            >
+              Cart ({cart.reduce((s, p) => s + p.qty, 0)})
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div className="md:col-span-2">
+          <h1 className="text-4xl font-extrabold">मजेदार बिहार — घर बैठे मंगाइए</h1>
+          <p className="mt-3 text-gray-700">ठेठ देसी स्वाद — Thekua, Khasta, Litti-Chokha और और भी बहुत कुछ। ताज़ा, भरोसेमंद और तेज़ डिलीवरी (region specific).</p>
+
+          <div className="mt-6 flex gap-3">
+            <button
+              onClick={() => window.scrollTo({ top: 1000, behavior: "smooth" })}
+              className="px-4 py-2 bg-rose-500 text-white rounded-md"
+            >
+              शॉप शुरू करें
+            </button>
+
+            <button
+              onClick={() => alert('हम जल्दी ही विक्रेता पंजीकरण और पेमेंट गेटवे जोड़ेंगे (demo).')}
+              className="px-4 py-2 border rounded-md"
+            >
+              विक्रेता बनें
+            </button>
+          </div>
+        </div>
+
+        <div className="hidden md:block">
+          <img
+            src="https://source.unsplash.com/600x600/?bihar,food,indian"
+            alt="Bihar special"
+            className="rounded-2xl shadow-lg w-full object-cover h-64"
+          />
+        </div>
+      </section>
+
+      {/* Products */}
+      <main className="max-w-6xl mx-auto px-4 pb-20">
+        <h2 className="text-2xl font-semibold mb-4">लोकप्रिय वस्तुएँ</h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((p) => (
+            <div key={p.id} className="bg-white rounded-2xl shadow p-4 flex flex-col">
+              <div className="relative">
+                <img
+                  src={p.img}
+                  alt={p.name}
+                  className="rounded-lg h-44 w-full object-cover"
+                />
+                <div className="absolute right-3 top-3 bg-white/80 px-2 py-1 rounded-full text-sm">{p.unit}</div>
+              </div>
+
+              <div className="mt-3 flex-1">
+                <h3 className="text-lg font-semibold">{p.name}</h3>
+                <p className="text-sm text-gray-600 mt-2">{p.desc}</p>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-gray-500">Price</div>
+                  <div className="text-xl font-bold">₹{p.price}</div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setSelected(p); }}
+                    className="px-3 py-2 border rounded-md text-sm"
+                  >
+                    देखें
+                  </button>
+
+                  <button
+                    onClick={() => addToCart(p)}
+                    className="px-3 py-2 bg-rose-500 text-white rounded-md text-sm"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {filtered.length === 0 && (
+          <div className="mt-8 text-center text-gray-600">कोई आइटम नहीं मिला — खोज बदलकर देखें।</div>
+        )}
+      </main>
+
+      {/* Cart Sidebar */}
+      {showCart && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black/40" onClick={() => setShowCart(false)} />
+
+          <div className="w-96 bg-white shadow-xl p-6 overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">आपकी टोकरी</h3>
+              <button className="text-gray-500" onClick={() => setShowCart(false)}>बंद</button>
+            </div>
+
+            <div className="mt-4">
+              {cart.length === 0 ? (
+                <div className="text-gray-600">टोकरी खाली है।</div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {cart.map((c) => (
+                    <div key={c.id} className="flex items-center gap-3 border-b pb-3">
+                      <img src={c.img} alt={c.name} className="w-16 h-16 object-cover rounded" />
+                      <div className="flex-1">
+                        <div className="font-semibold">{c.name}</div>
+                        <div className="text-sm text-gray-500">₹{c.price} x {c.qty}</div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => changeQty(c.id, c.qty - 1)}
+                            className="px-2 py-1 border rounded"
+                          >-</button>
+                          <div className="px-2">{c.qty}</div>
+                          <button
+                            onClick={() => changeQty(c.id, c.qty + 1)}
+                            className="px-2 py-1 border rounded"
+                          >+</button>
+                        </div>
+
+                        <button onClick={() => removeFromCart(c.id)} className="text-sm text-red-500">हटाएँ</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="mt-6 border-t pt-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-gray-600">Subtotal</div>
+                  <div className="font-bold">₹{subtotal}</div>
+                </div>
+
+                <button
+                  disabled={cart.length === 0}
+                  onClick={() => alert('Checkout demo — पेमेंट गेटवे जोड़ने के लिए कहें')}
+                  className="mt-4 w-full px-4 py-2 bg-rose-500 text-white rounded disabled:opacity-60"
+                >
+                  Checkout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Product Modal */}
+      {selected && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setSelected(null)}></div>
+          <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full z-50 overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              <div className="p-4">
+                <img src={selected.img} alt={selected.name} className="w-full h-80 object-cover rounded-lg" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-2xl font-bold">{selected.name}</h3>
+                <p className="mt-2 text-gray-700">{selected.desc}</p>
+                <div className="mt-4">
+                  <div className="text-sm text-gray-500">मात्रा</div>
+                  <div className="text-xl font-semibold">₹{selected.price} / {selected.unit}</div>
+                </div>
+
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={() => { addToCart(selected); setSelected(null); }}
+                    className="px-4 py-2 bg-rose-500 text-white rounded-md"
+                  >
+                   _CART में जोड़ें
+                  </button>
+
+                  <button onClick={() => setSelected(null)} className="px-4 py-2 border rounded-md">बंद करें</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="mt-12 bg-white border-t">
+        <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between">
+          <div className="text-sm text-gray-600">© {new Date().getFullYear()} BiharBazaar — Made with ❤️ in Bihar</div>
+          <div className="flex gap-4 mt-3 md:mt-0 text-sm">
+            <a className="hover:underline">Contact</a>
+            <a className="hover:underline">Vendors</a>
+            <a className="hover:underline">Privacy</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
